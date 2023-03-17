@@ -1,5 +1,6 @@
 package br.com.raissafrota.msavaliadorcredito.controller;
 
+import br.com.raissafrota.msavaliadorcredito.entity.SituacaoCliente;
 import br.com.raissafrota.msavaliadorcredito.service.AvaliadorCreditoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ public class AvaliadorCreditoController {
 
     @GetMapping(value = "situacao-cliente", params = "cpf")
     public ResponseEntity consultarSituacaoCliente(@RequestParam("cpf") String cpf){
-       return  null;
+        SituacaoCliente situacaoCliente = avaliadorCreditoService.obterSituacaoCliente(cpf);
+        return ResponseEntity.ok(situacaoCliente);
     }
 }
