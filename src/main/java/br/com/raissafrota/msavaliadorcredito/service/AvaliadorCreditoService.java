@@ -3,6 +3,8 @@ package br.com.raissafrota.msavaliadorcredito.service;
 import br.com.raissafrota.msavaliadorcredito.entity.CartaoCliente;
 import br.com.raissafrota.msavaliadorcredito.entity.DadosCliente;
 import br.com.raissafrota.msavaliadorcredito.entity.SituacaoCliente;
+import br.com.raissafrota.msavaliadorcredito.exception.DadosClienteNotFoundException;
+import br.com.raissafrota.msavaliadorcredito.exception.ErroComunicacaoMicroservicesException;
 import br.com.raissafrota.msavaliadorcredito.feignClients.CartoesResourceClient;
 import br.com.raissafrota.msavaliadorcredito.feignClients.ClienteResouceClient;
 import feign.FeignException;
@@ -21,7 +23,7 @@ public class AvaliadorCreditoService {
 
     // 1) obterDadosCliente - msclientes
     // 2) obterDadosCartaoDoCliente - mscartoes
-    public SituacaoCliente obterSituacaoCliente(String cpf){
+    public SituacaoCliente obterSituacaoCliente(String cpf)  throws DadosClienteNotFoundException, ErroComunicacaoMicroservicesException {
         try {
             ResponseEntity<DadosCliente> dadosClienteResponse = clienteClient.dadosCliente(cpf);
             ResponseEntity<List<CartaoCliente>> cartoesResponse = cartoesClient.getCartoesByCliente(cpf);
@@ -34,7 +36,10 @@ public class AvaliadorCreditoService {
 
         }catch (FeignException.FeignClientException e){
             int status = e.status();
-            return null;
+            if(HttpStatus.NOT_FOUND.value() == status){
+                throw new DadosClienteNotFoundException();
+            }
+            throw new ErroComunicacaoMicroservicesException(e.getMessage(), status);
         }
     }
 
